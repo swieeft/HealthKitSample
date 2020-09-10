@@ -52,14 +52,14 @@ class ViewController: UIViewController {
         
         stepsQurey.initialResultsHandler = { query, results, error in
             let endDate = Date()
-            let startDate = calendar.date(byAdding: .day, value: -7, to: endDate, wrappingComponents: false)
+            let startDate = calendar.date(byAdding: .day, value: -9, to: endDate, wrappingComponents: false)
             
             if let myResults = results {
                 myResults.enumerateStatistics(from: startDate!, to: endDate) { statistics, stop in
                     if let quantity = statistics.sumQuantity() {
                         let dateFormatter = DateFormatter()
                         dateFormatter.timeZone = .current
-                        dateFormatter.timeZone = TimeZone(identifier: "UTC")
+                        dateFormatter.locale = .current
                         dateFormatter.dateFormat = "yyyy-MM-dd"
                         
                         let steps = quantity.doubleValue(for: HKUnit.count())
@@ -109,11 +109,24 @@ class ViewController: UIViewController {
                     if let sample = item as? HKCategorySample {
                         let dateFormatter = DateFormatter()
                         dateFormatter.timeZone = .current
-                        dateFormatter.timeZone = TimeZone(identifier: "UTC")
+                        dateFormatter.locale = .current
                         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                         
                         let value = sample.value == HKCategoryValueSleepAnalysis.inBed.rawValue ? "취침" : "수면"
                         print("sleep : \(dateFormatter.string(from: sample.startDate)) ~ \(dateFormatter.string(from: sample.endDate)), value : \(value)")
+                        
+                        var calendar = Calendar.current
+                        calendar.locale = .current
+                        let dateComponents = calendar.dateComponents([.hour, .minute], from: sample.startDate, to: sample.endDate)
+                        if case let (h?, m?) = (dateComponents.hour, dateComponents.minute) {
+                            if h == 0 {
+                                print("\(m)분")
+                            } else if m == 0 {
+                                print("\(h)시간")
+                            } else {
+                                print("\(h)시간 \(m)분")
+                            }
+                        }
                     }
                 }
             }

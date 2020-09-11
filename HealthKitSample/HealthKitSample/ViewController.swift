@@ -95,9 +95,13 @@ class ViewController: UIViewController {
     func getSleep() {
         let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
         
+        let now = Date()
+        let startOfDay = Calendar.current.startOfDay(for: now.addingTimeInterval(-86400 * 2))
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
         
-        let query = HKSampleQuery(sampleType: sleepType, predicate: nil, limit: 30, sortDescriptors: [sortDescriptor]) { query, tmpResult, error in
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
+        
+        let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [sortDescriptor]) { query, tmpResult, error in
             if let error = error {
                 print(error.localizedDescription)
             } else {
